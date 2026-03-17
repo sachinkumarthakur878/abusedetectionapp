@@ -1,0 +1,39 @@
+import React from "react";
+import Search from "./Search";
+import Users from "./Users";
+import Logout from "./Logout";
+import { useAuth } from "../../context/AuthProvider.jsx";
+
+function Left() {
+  const [authUser] = useAuth();
+
+  return (
+    <div className="flex flex-col h-screen border-r border-white/10 bg-black/90 text-teal-400 w-72">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 py-4 border-b border-white/10">
+        <div className="avatar online">
+          <div className="w-10 rounded-full ring ring-teal-400 ring-offset-base-100 ring-offset-1">
+            <img src="/user.jpg" alt="me" />
+          </div>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-white font-semibold text-sm truncate">{authUser?.user?.fullname}</p>
+          <p className="text-green-400 text-xs">🟢 Online</p>
+        </div>
+      </div>
+
+      {/* Search */}
+      <Search />
+
+      {/* Users list */}
+      <div className="flex-1 overflow-y-auto">
+        <Users />
+      </div>
+
+      {/* Logout */}
+      <Logout />
+    </div>
+  );
+}
+
+export default Left;
