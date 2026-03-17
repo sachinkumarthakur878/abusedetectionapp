@@ -7,6 +7,17 @@ import { useAuth } from "../../context/AuthProvider.jsx";
 function Left() {
   const [authUser] = useAuth();
 
+  // Fallback: directly localStorage se bhi try karo
+  const getName = () => {
+    if (authUser?.fullname) return authUser.fullname;
+    try {
+      const stored = localStorage.getItem("ChatApp");
+      if (!stored) return "";
+      const parsed = JSON.parse(stored);
+      return parsed?.fullname || parsed?.user?.fullname || "";
+    } catch { return ""; }
+  };
+
   return (
     <div className="flex flex-col h-screen border-r border-white/10 bg-black/90 text-teal-400 w-72">
       {/* Header */}
@@ -17,20 +28,17 @@ function Left() {
           </div>
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-sm truncate">{authUser?.user?.fullname}</p>
+          <p className="text-white font-semibold text-sm truncate">{getName()}</p>
           <p className="text-green-400 text-xs">🟢 Online</p>
         </div>
       </div>
 
-      {/* Search */}
       <Search />
 
-      {/* Users list */}
       <div className="flex-1 overflow-y-auto">
         <Users />
       </div>
 
-      {/* Logout */}
       <Logout />
     </div>
   );
