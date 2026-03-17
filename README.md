@@ -2,7 +2,7 @@
 
 > A full-stack real-time chat application with multi-layer AI-powered abuse detection for text, voice, images, and emojis.
 
-**Live Demo:** [securechatwebapp-2huv.vercel.app](securechatwebapp-2huv.vercel.app)  
+**Live Demo:** [securechatwebapp-2huv.vercel.app](https://securechatwebapp-2huv.vercel.app/)  
 **Backend API:** [https://securechatwebapp-yv8p.onrender.com](https://securechatwebapp-yv8p.onrender.com)
 
 ---
