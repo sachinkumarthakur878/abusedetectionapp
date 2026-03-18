@@ -61,14 +61,13 @@ console.log("MAIL PASS:", process.env.EMAIL_PASS);
 
 // ✅ FIXED transporter (Render compatible)
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp-relay.brevo.com",
   port: 587,
-  secure: false, // TLS
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 10000,
 });
 
 // Optional: SMTP verify (debug)
