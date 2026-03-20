@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import Message from "./Message";
 import useGetMessage from "../../context/useGetMessage.js";
 import Loading from "../../components/Loading.jsx";
@@ -11,6 +11,8 @@ function Messages({ onReply }) {
   useGetSocketMessage();
 
   const lastMsgRef = useRef();
+  // FIX: isTyping check should match senderId from the socket, not selectedConversation._id
+  // The typing event emits senderId of the OTHER person, which IS selectedConversation._id — correct.
   const isTyping = typingUsers?.includes(selectedConversation?._id);
 
   useEffect(() => {
@@ -19,7 +21,7 @@ function Messages({ onReply }) {
         lastMsgRef.current.scrollIntoView({ behavior: "smooth" });
       }
     }, 100);
-  }, [messages]);
+  }, [messages, isTyping]);
 
   return (
     <div className="flex-1 overflow-y-auto px-1 py-2" style={{ minHeight: "calc(95vh - 5vh)" }}>
@@ -28,8 +30,10 @@ function Messages({ onReply }) {
       ) : (
         <>
           {messages.length > 0 ? (
-            messages.map((message) => (
-              <div key={message._id} ref={lastMsgRef}>
+            messages.map((message, index) => (
+              // FIX: lastMsgRef was applied to EVERY message div via ref={lastMsgRef}
+              // (overwrote ref each iteration). Now only applied to the LAST message.
+              <div key={message._id} ref={index === messages.length - 1 ? lastMsgRef : null}>
                 <Message message={message} onReply={onReply} />
               </div>
             ))
@@ -39,9 +43,9 @@ function Messages({ onReply }) {
             </div>
           )}
 
-          {/* ── Typing Indicator ─────────────────────── */}
+          {/* Typing Indicator */}
           {isTyping && (
-            <div className="chat chat-start px-2 py-1">
+            <div ref={lastMsgRef} className="chat chat-start px-2 py-1">
               <div className="chat-bubble bg-white/10 border border-white/20 px-4 py-2 flex items-center gap-1">
                 <span className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
                 <span className="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />

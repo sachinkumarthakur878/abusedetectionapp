@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.MODE === "production"
-  ? "https://abusedetectionapp.onrender.com"
-  : "";
+// FIX: axiosInstance was using hardcoded production URL with empty string fallback for dev.
+// Empty string baseURL causes issues — use env var consistently.
+const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,

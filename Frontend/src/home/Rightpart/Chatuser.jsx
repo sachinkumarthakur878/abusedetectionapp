@@ -1,46 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useConversation from "../../zustand/useConversation.js";
 import { useSocketContext } from "../../context/SocketContext.jsx";
 import { CiMenuFries } from "react-icons/ci";
 import VideoCall from "./VideoCall.jsx";
-import { useAuth } from "../../context/AuthProvider.jsx";
 
 function Chatuser() {
   const { selectedConversation } = useConversation();
   const { onlineUsers, socket } = useSocketContext();
-  const [authUser] = useAuth();
   const isOnline = onlineUsers.includes(selectedConversation?._id);
 
-  const [activeCall, setActiveCall] = useState(null); // { type: "video"|"voice", incoming?: {} }
-  const [incomingCall, setIncomingCall] = useState(null);
+  const [activeCall, setActiveCall] = useState(null);
 
-  // Listen for incoming calls
-  React.useEffect(() => {
+  // FIX: incomingCall listener — pehle off karo phir on karo (prevent duplicate listeners)
+  useEffect(() => {
     if (!socket) return;
-    socket.on("incomingCall", (data) => {
-      setIncomingCall(data);
-    });
-    return () => socket.off("incomingCall");
+
+    const handleIncomingCall = (data) => {
+      // FIX: Agar pehle se koi call chal rahi hai to naya call ignore karo
+      setActiveCall(prev => {
+        if (prev) return prev; // already in a call
+        return { type: data.callType, incoming: data };
+      });
+    };
+
+    socket.on("incomingCall", handleIncomingCall);
+
+    return () => {
+      // FIX: Cleanup — listener remove karo warna multiple listeners ban jaate hain
+      socket.off("incomingCall", handleIncomingCall);
+    };
   }, [socket]);
 
   const startVideoCall = () => setActiveCall({ type: "video" });
   const startVoiceCall = () => setActiveCall({ type: "voice" });
-  const closeCall = () => { setActiveCall(null); setIncomingCall(null); };
-
-  // Auto-show incoming call modal
-  React.useEffect(() => {
-    if (incomingCall) setActiveCall({ type: incomingCall.callType, incoming: incomingCall });
-  }, [incomingCall]);
+  const closeCall = () => setActiveCall(null);
 
   return (
     <>
       <div className="relative flex items-center justify-between px-4 h-[64px] bg-black/80 border-b border-white/10">
-        {/* Menu button */}
         <label htmlFor="my-drawer-2" className="btn btn-ghost drawer-button lg:hidden">
           <CiMenuFries className="text-white text-xl" />
         </label>
 
-        {/* User info */}
         <div className="flex items-center gap-3 flex-1">
           <div className={`avatar ${isOnline ? "online" : "offline"}`}>
             <div className="w-10 rounded-full ring ring-teal-400 ring-offset-base-100 ring-offset-1">
@@ -57,7 +58,6 @@ function Chatuser() {
           </div>
         </div>
 
-        {/* Call buttons */}
         <div className="flex items-center gap-2">
           <button
             onClick={startVoiceCall}
@@ -72,7 +72,6 @@ function Chatuser() {
         </div>
       </div>
 
-      {/* ── Call Modal ─────────────────────────────── */}
       {activeCall && (
         <VideoCall
           callType={activeCall.type}

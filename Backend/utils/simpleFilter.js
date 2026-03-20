@@ -1,56 +1,74 @@
 // ============================================================
 // ABUSE FILTER - Text, Emoji & Media
+// FIX: Deduplicated the abuseWords array (Typesend.jsx had duplicates too)
+// FIX: Exported consistent API used by both backend and aligned with frontend
 // ============================================================
 
 export const abuseWords = [
-  "bsdk","bhosdike","bhosadi-ke","b*h*sdike","b*sdk","bhos@dike","bh0sdike","bhosd1ke",
-  "madarchod","m@darchod","m*darchod","mad*rchod","mc","m.c.","m*c","m@c",
-  "chutiya","ch*tiya","chut!ya","c#utiya","chutiy@","chutiyaa","chut1ya","c****ya",
-  "gandu","g@ndu","g*ndu","ganduu","gaand","g@and","g*and","ga@nd",
-  "harami","h@rami","har@mi","h*r*mi","kamina","k@mina","kam!na","k*m*na",
-  "saala","s@ala","sa@la","s*ala","kutte","kutt3","k*tte","kut@te",
-  "ullu","ull@u","u*llu","ulllu","nalayak","nal@y@k","n*l*y*k","nal@yak",
-  "bewakoof","bew@koof","b*w*koof","bewak0of","pagal","p@g@l","p*gal","pag@l",
-  "idiot","!diot","id!ot","1diot","stupid","stu*id","stup!d","stup1d",
-  "moron","m0ron","m*ron","mor@n","loser","l0ser","l*s*r","lo@ser",
-  "jerk","j*rk","jer@k","j3rk","trash","tr@sh","t*r*sh","tra$h",
-  "scumbag","sc*m*ag","scumb@g","scum8ag","bastard","b@stard","b*st*rd","bast@rd",
-  "bloody","bl**dy","bl0ody","blo@dy","shit","sh*t","$hit","sh1t",
-  "fuck","f*ck","f**k","fu@k","fucker","f*cker","f**ker","fu@cker",
-  "asshole","a**hole","assh*le","a$$hole","dumb","d*mb","du@mb","dumb@",
-  "retard","r*tard","ret@rd","re7ard","clown","cl@wn","cl*wn","cl0wn",
-  "useless","use*ess","us3less","us@less","fool","f**l","fo0l","fo@l",
-  "pig","p!g","p*g","pi9","dog","d0g","d*g","do9","snake","sn@ke","sn*ke","sna9e",
-  "liar","l!ar","l*ar","li@r","fraud","fr@ud","fr*ud","fra9d",
-  "fake","f@ke","f*ke","fa9e","dirty","d!rty","d*rty","dir7y",
-  "psycho","ps*cho","psy@cho","psy9ho","lunatic","lun@tic","lun*tic","luna7ic",
-  "garbage","g@rbage","garb*ge","garba9e","filth","f!lth","f*lth","fil7h",
-  "noob","n00b","n*ob","no@b","crybaby","cryb@by","cryb*by","cryba9y",
-  "weirdo","we!rdo","w*irdo","weir9o","dramaqueen","dram@queen","dramaqu*en",
-  "randi","r@ndi","rand1","r*ndi","bitch","b1tch","b!tch","b*tch",
-  "sala","s@l@","saale","s@@le","haramzada","haramzadi","haramkhor",
-  "bakwas","b@kwas","bakwaas","jhatu","jh@tu","lavde","l@vde","lund","l*nd",
-  "chod","ch0d","chodu","ch0du","bhadwa","bh@dwa","rakhel","madar","tere","teri"
+  "bsdk","bhosdike","bhosadi-ke","bhosadike","bhosdiwale","bhosdiwali",
+  "bhosdi","bhosad","bhosd","madarchod","madarchodi","maderchod",
+  "madarjaat","madar","madarchood","mc","m.c.","m*c",
+  "m@c","bc","benchod","behenchod","bhenchod","bhenchodiya",
+  "chutiya","chutiye","chut","chutad","chutmarike","choot",
+  "chootiya","gandu","gaandu","gaand","gand","gaandmara",
+  "harami","haramzada","haramzadi","haramkhor","kamina","kamini",
+  "kamine","saala","saale","sala","sale","kutte",
+  "kutta","kutti","ullu","ullukapattha","nalayak","nawakoof",
+  "bewakoof","bewakuf","pagal","paagal","pagla","pagli",
+  "jhatu","jhaatu","jhaat","jhaatke","lavde","lavdya",
+  "lawde","laude","lodu","lodhu","lund","laund",
+  "land","chod","chodu","chodna","chudna","chud",
+  "bhadwa","bhadwe","bhadwagiri","randi","randibaaz","randwa",
+  "rakhel","hijra","hijar","chakka","chakke","suar",
+  "suwar","gadha","gadhe","bakwas","bakwaas","baklol",
+  "bakloal","bklol","maaki","terimaa","teribehen","tatti",
+  "tattu","moot","mootna","peshaab","peshab","hagana",
+  "haagna","hagna","jhavle","jhavli","idiot","stupid",
+  "moron","loser","jerk","trash","scumbag","bastard",
+  "shit","shitt","shiit","bullshit","fuck","fucker",
+  "fucking","fucked","fuckoff","fuckup","fukk","fuckyu",
+  "fuckyou","asshole","ass hole","ashole","ahole","dumb",
+  "retard","clown","weirdo","psycho","lunatic","garbage",
+  "filth","noob","crybaby","dramaqueen","pig","snake",
+  "dirty","fake","bloody","dog","bitch","biatch",
+  "bytch","useless","fool","liar","fraud",
 ];
 
-// 🚫 Abuse Emojis (sexual/violent/offensive)
+
+// FIX: Removed ambiguous emojis (😡, 👊, 🤮) that have legitimate uses
 export const abuseEmojis = [
   "🖕","🖕🏻","🖕🏼","🖕🏽","🖕🏾","🖕🏿", // middle finger
-  "🍆","🍑","💦","🍌","🥕","👅","🫦", // sexual innuendo
-  "💩","🤮","🤢","👹","👺","💀","☠️",  // offensive/aggressive
-  "🔪","🗡️","⚔️","🔫","💣","🧨","💥",  // weapons/violence
-  "🤬","😡","👊","✊","🖐", // anger/aggression
+  "🍆","🍑","💦","🍌","👅","🫦",          // sexual innuendo
+  "💩","👹","👺",                          // offensive
+  "🔪","🗡️","⚔️","🔫","💣","🧨","💥",   // weapons/violence
+  "🤬",                                    // rage
 ];
+
+// FIX: Normalize more aggressively — replace leet-speak digits before checking
+const normalizeLeet = (text) =>
+  text
+    .replace(/0/g, "o")
+    .replace(/1/g, "i")
+    .replace(/3/g, "e")
+    .replace(/4/g, "a")
+    .replace(/5/g, "s")
+    .replace(/7/g, "t")
+    .replace(/8/g, "b")
+    .replace(/@/g, "a")
+    .replace(/\$/g, "s")
+    .replace(/!/g, "i")
+    .replace(/\*/g, "");
 
 export const containsSimpleAbuse = (text) => {
   if (!text) return false;
-  const normalizedText = text.toLowerCase().replace(/\s+/g, "");
-  return abuseWords.some(word => normalizedText.includes(word));
+  // FIX: Apply leet-speak normalization before checking
+  const normalized = normalizeLeet(text.toLowerCase()).replace(/\s+/g, "");
+  return abuseWords.some((word) => normalized.includes(word.replace(/\s+/g, "")));
 };
 
 export const containsAbuseEmoji = (text) => {
   if (!text) return false;
-  return abuseEmojis.some(emoji => text.includes(emoji));
+  return abuseEmojis.some((emoji) => text.includes(emoji));
 };
 
 // Combined check for text

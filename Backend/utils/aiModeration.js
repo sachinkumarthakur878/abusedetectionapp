@@ -28,10 +28,6 @@ export const checkAbuseWithAI = async (text) => {
 
 // export const checkAbuseWithAI = async (text) => {
 //   try {
-//     const response = await openai.moderations.create({
-//       model: "omni-moderation-latest",
-//       input: text,
-//     });
 
 //     return response.results[0]; // { flagged: true/false }
 
@@ -40,6 +36,4 @@ export const checkAbuseWithAI = async (text) => {
 
 //     // 🔥 AI fail ho to safe allow karo
 //     return { flagged: false };
-//   }
-// };
 

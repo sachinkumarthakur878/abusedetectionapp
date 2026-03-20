@@ -12,7 +12,7 @@ const getAuthToken = () => {
 const useSendMessage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { messages, setMessage, selectedConversation } = useConversation();
+  const { setMessage, selectedConversation } = useConversation();
 
   useEffect(() => {
     setError(null);
@@ -25,11 +25,14 @@ const useSendMessage = () => {
       ? { message: payload, messageType: "text" }
       : payload;
 
-    // Backend ko base64 mat bhejo — sirf metadata bhejo
+    // FIX: Image/voice ka mediaUrl ab backend ko bhi bhejo (DB mein save hoga)
+    // Pehle null bhejte the — isliye refresh pe hat jaati thi
     const backendData = { ...data };
-    if (backendData.messageType === "image" || backendData.messageType === "voice") {
+    // Voice ke liye ab bhi null (large audio files DB mein nahi)
+    if (backendData.messageType === "voice") {
       backendData.mediaUrl = null;
     }
+    // Image ab DB mein jayegi — mediaUrl as-is bhejo
 
     try {
       setLoading(true);
@@ -45,8 +48,12 @@ const useSendMessage = () => {
         }
       );
 
-      // Sender ke liye original mediaUrl (base64) use karo
-      const displayMsg = { ...res.data, mediaUrl: data.mediaUrl || null };
+      // FIX: res.data mein ab actual mediaUrl hoga (DB se) — use karo directly
+      // Voice ke liye local base64 use karo (play karne ke liye)
+      const displayMsg = {
+        ...res.data,
+        mediaUrl: data.messageType === "voice" ? (data.mediaUrl || null) : res.data.mediaUrl,
+      };
       setMessage(prev => [...(prev || []), displayMsg]);
       return true;
 
@@ -81,7 +88,7 @@ const useSendMessage = () => {
       );
       setMessage(prev => (prev || []).map(m =>
         m._id === messageId
-          ? { ...m, isDeleted: true, message: "This message was deleted" }
+          ? { ...m, isDeleted: true, message: "This message was deleted", mediaUrl: null }
           : m
       ));
     } catch (err) {

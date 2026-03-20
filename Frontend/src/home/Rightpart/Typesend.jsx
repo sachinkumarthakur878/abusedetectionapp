@@ -400,13 +400,8 @@ function Typesend({ replyMessage, onCancelReply }) {
           replyTo: replyMessage?._id || null
         });
         if (success) {
-          // Socket se receiver ko base64 image bhejo
-          socket?.emit("sendImageToReceiver", {
-            receiverId: selectedConversation?._id,
-            mediaUrl: base64Image,
-            mediaName: imageFile.name,
-            senderId: authUser?._id || authUser?._id || authUser?.user?._id,
-          });
+          // FIX: Socket emit hataya — image ab DB mein save hai
+          // newMessage socket event se receiver ko automatically milegi
           setImageFile(null); setImagePreview(null);
           setImageError(""); onCancelReply?.();
         }

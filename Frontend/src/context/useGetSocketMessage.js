@@ -10,31 +10,16 @@ const useGetSocketMessage = () => {
   useEffect(() => {
     if (!socket) return;
 
-    // New text/voice message from backend
+    // New text/voice/image message from backend
     socket.on("newMessage", (newMessage) => {
       new Audio(notificationSound).play().catch(() => {});
-      // Functional update — stale closure se bachao
       setMessage(prev => [...(prev || []), newMessage]);
     });
 
-    // Image via direct socket (base64)
-    socket.on("receiveImage", ({ mediaUrl, mediaName, senderId }) => {
-      new Audio(notificationSound).play().catch(() => {});
-      const imageMsg = {
-        _id: `img_${Date.now()}`,
-        senderId,
-        messageType: "image",
-        mediaUrl,
-        mediaName,
-        message: "",
-        createdAt: new Date().toISOString(),
-        reactions: [],
-        readBy: [],
-      };
-      setMessage(prev => [...(prev || []), imageMsg]);
-    });
+    // FIX: receiveImage ab zaroori nahi — image DB mein save hai aur newMessage event se aa rahi hai
+    // Lekin backward compatibility ke liye rakho (agar koi purana code ho)
+    // socket.on("receiveImage", ...) — REMOVED: causes duplicate images
 
-    // Typing indicator
     socket.on("userTyping", ({ senderId }) => {
       if (selectedConversation?._id === senderId) {
         setTypingUsers(prev => [...new Set([...(prev || []), senderId])]);
@@ -45,31 +30,28 @@ const useGetSocketMessage = () => {
       setTypingUsers(prev => (prev || []).filter(id => id !== senderId));
     });
 
-    // Reactions
     socket.on("messageReaction", ({ messageId, reactions }) => {
       setMessage(prev => (prev || []).map(m =>
         m._id === messageId ? { ...m, reactions } : m
       ));
     });
 
-    // Delete
     socket.on("messageDeleted", ({ messageId }) => {
       setMessage(prev => (prev || []).map(m =>
         m._id === messageId
-          ? { ...m, isDeleted: true, message: "This message was deleted" }
+          ? { ...m, isDeleted: true, message: "This message was deleted", mediaUrl: null }
           : m
       ));
     });
 
     return () => {
       socket.off("newMessage");
-      socket.off("receiveImage");
       socket.off("userTyping");
       socket.off("userStoppedTyping");
       socket.off("messageReaction");
       socket.off("messageDeleted");
     };
-  }, [socket, selectedConversation]); // messages dependency hatao — stale closure fix
+  }, [socket, selectedConversation]);
 };
 
 export default useGetSocketMessage;

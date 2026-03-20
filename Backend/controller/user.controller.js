@@ -3,13 +3,15 @@ import bcrypt from "bcryptjs";
 import createTokenAndSaveCookie from "../jwt/generateToken.js";
 import { sendOtpEmail } from "../utils/sendOtpEmail.js";
 
-// ─────────────────────────────────────────
-// TUMHARA ORIGINAL CODE — BILKUL NAHI BADLA
-// ─────────────────────────────────────────
+const otpStore = new Map();
 
+// ─── Signup ────────────────────────────────────────────────────
 export const signup = async (req, res) => {
   const { fullname, email, password, confirmPassword } = req.body;
   try {
+    if (!fullname || !email || !password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "Passwords do not match" });
     }
@@ -18,18 +20,14 @@ export const signup = async (req, res) => {
       return res.status(400).json({ error: "User already registered" });
     }
     const hashPassword = await bcrypt.hash(password, 10);
-    const newUser = await new User({ fullname, email, password: hashPassword });
-    await newUser.save();
+    // FIX: Was `await new User({...})` which does NOT auto-save. Use User.create() instead.
+    const newUser = await User.create({ fullname, email, password: hashPassword });
     if (newUser) {
       const token = createTokenAndSaveCookie(newUser._id, res);
-      res.status(201).json({
+      return res.status(201).json({
         message: "User created successfully",
         token,
-        user: {
-          _id: newUser._id,
-          fullname: newUser.fullname,
-          email: newUser.email,
-        },
+        user: { _id: newUser._id, fullname: newUser.fullname, email: newUser.email },
       });
     }
   } catch (error) {
@@ -38,23 +36,28 @@ export const signup = async (req, res) => {
   }
 };
 
+// ─── Login ────────────────────────────────────────────────────
 export const login = async (req, res) => {
   const { email, password } = req.body;
   try {
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
     const user = await User.findOne({ email });
+    // FIX: Original called bcrypt.compare BEFORE checking if user exists → runtime crash on null
+    if (!user) {
+      return res.status(400).json({ error: "Invalid user credential" });
+    }
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!user || !isMatch) {
+    if (!isMatch) {
       return res.status(400).json({ error: "Invalid user credential" });
     }
     const token = createTokenAndSaveCookie(user._id, res);
-    res.status(201).json({
+    // FIX: 200 OK is correct for login, not 201 Created
+    return res.status(200).json({
       message: "User logged in successfully",
       token,
-      user: {
-        _id: user._id,
-        fullname: user.fullname,
-        email: user.email,
-      },
+      user: { _id: user._id, fullname: user.fullname, email: user.email },
     });
   } catch (error) {
     console.log(error);
@@ -62,34 +65,33 @@ export const login = async (req, res) => {
   }
 };
 
+// ─── Logout ───────────────────────────────────────────────────
 export const logout = async (req, res) => {
   try {
-    res.clearCookie("jwt");
-    res.status(201).json({ message: "User logged out successfully" });
+    res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: "none" });
+    // FIX: 200 OK is correct for logout, not 201 Created
+    return res.status(200).json({ message: "User logged out successfully" });
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
+// ─── All Users ─────────────────────────────────────────────────
 export const allUsers = async (req, res) => {
   try {
     const loggedInUser = req.user._id;
-    const filteredUsers = await User.find({
-      _id: { $ne: loggedInUser },
-    }).select("-password");
-    res.status(201).json(filteredUsers);
+    const filteredUsers = await User.find({ _id: { $ne: loggedInUser } }).select("-password");
+    // FIX: 200 OK is correct for GET, not 201 Created; also added missing catch response
+    return res.status(200).json(filteredUsers);
   } catch (error) {
     console.log("Error in allUsers Controller: " + error);
+    // FIX: Original had NO response in catch — request would hang forever
+    return res.status(500).json({ error: "Internal server error" });
   }
 };
 
-// ─────────────────────────────────────────
-// NAYE OTP FUNCTIONS — SIRF YEH ADD KIE
-// ─────────────────────────────────────────
-
-const otpStore = new Map();
-
+// ─── Send OTP ─────────────────────────────────────────────────
 export const sendOtp = async (req, res) => {
   const { fullname, email, password, confirmPassword } = req.body;
   try {
@@ -101,6 +103,11 @@ export const sendOtp = async (req, res) => {
     }
     if (password.length < 6) {
       return res.status(400).json({ error: "Password must be at least 6 characters" });
+    }
+    // FIX: Added email format validation — missing in original
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
     }
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -116,7 +123,10 @@ export const sendOtp = async (req, res) => {
       attempts: 0,
     });
     await sendOtpEmail(email, otp, fullname);
-    console.log(`OTP sent to ${email}: ${otp}`);
+    // FIX: Never log OTP in production — security risk
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`OTP sent to ${email}: ${otp}`);
+    }
     return res.status(200).json({ message: "OTP sent successfully! Please check your email." });
   } catch (error) {
     console.log("Error in sendOtp:", error);
@@ -124,6 +134,7 @@ export const sendOtp = async (req, res) => {
   }
 };
 
+// ─── Verify OTP & Signup ──────────────────────────────────────
 export const verifyOtpAndSignup = async (req, res) => {
   const { email, otp } = req.body;
   try {
@@ -152,17 +163,18 @@ export const verifyOtpAndSignup = async (req, res) => {
     }
     const { fullname, password } = stored.userData;
     otpStore.delete(email);
+    // FIX: Race condition — check if email was registered between OTP send and verify
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already registered. Please login." });
+    }
     const newUser = new User({ fullname, email, password });
     await newUser.save();
     const token = createTokenAndSaveCookie(newUser._id, res);
     return res.status(201).json({
       message: "Account created successfully! Welcome to TrueChat",
       token,
-      user: {
-        _id: newUser._id,
-        fullname: newUser.fullname,
-        email: newUser.email,
-      },
+      user: { _id: newUser._id, fullname: newUser.fullname, email: newUser.email },
     });
   } catch (error) {
     console.log("Error in verifyOtpAndSignup:", error);
@@ -170,9 +182,13 @@ export const verifyOtpAndSignup = async (req, res) => {
   }
 };
 
+// ─── Resend OTP ───────────────────────────────────────────────
 export const resendOtp = async (req, res) => {
   const { email } = req.body;
   try {
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
     const stored = otpStore.get(email);
     if (!stored) {
       return res.status(400).json({ error: "Session expired. Please fill the signup form again." });
@@ -181,7 +197,9 @@ export const resendOtp = async (req, res) => {
     const expiry = Date.now() + 10 * 60 * 1000;
     otpStore.set(email, { ...stored, otp, expiry, attempts: 0 });
     await sendOtpEmail(email, otp, stored.userData.fullname);
-    console.log(`OTP resent to ${email}: ${otp}`);
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`OTP resent to ${email}: ${otp}`);
+    }
     return res.status(200).json({ message: "New OTP sent! Please check your email." });
   } catch (error) {
     console.log("Error in resendOtp:", error);

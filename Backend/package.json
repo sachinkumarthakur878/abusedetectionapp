@@ -1,17 +1,15 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "ChatApp ",
+  "description": "ChatApp",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "test": "node --test tests/simpleFilter.test.js tests/userController.test.js tests/messageController.test.js"
   },
-  "keywords": [
-    "MERN"
-  ],
+  "keywords": ["MERN"],
   "author": "Akhilesh",
   "license": "ISC",
   "dependencies": {

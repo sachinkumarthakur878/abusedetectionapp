@@ -10,12 +10,10 @@ export const sendMessage = async (req, res) => {
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
-    // ✅ Sirf text ke liye message required
     if (messageType === "text" && (!message || !message.trim())) {
       return res.status(400).json({ error: "Message cannot be empty" });
     }
 
-    // 🔥 Text abuse check
     if (messageType === "text") {
       if (isAbuseContent(message)) {
         return res.status(400).json({
@@ -32,7 +30,6 @@ export const sendMessage = async (req, res) => {
       }
     }
 
-    // 🔥 Emoji abuse check
     if (message && containsAbuseEmoji(message)) {
       return res.status(400).json({
         error: "🚫 Offensive emojis detected! Message blocked.",
@@ -40,9 +37,21 @@ export const sendMessage = async (req, res) => {
       });
     }
 
-    // ✅ Base64 data MongoDB mein save nahi hoti — skip karo
-    const safeMediaUrl = mediaUrl && mediaUrl.startsWith("data:") ? null :
-                         mediaUrl === "image_stored_locally" ? null : mediaUrl;
+    // FIX: Image ka base64 ab DB mein save hoga (5MB limit ke andar)
+    // Base64 ~1.37x original size hota hai — 3.5MB file ≈ 4.8MB base64, MongoDB 16MB doc limit safe hai
+    let safeMediaUrl = null;
+    if (mediaUrl) {
+      if (mediaUrl.startsWith("data:image/")) {
+        // Size check: base64 string length se approximate bytes
+        const approxBytes = (mediaUrl.length * 3) / 4;
+        if (approxBytes > 5 * 1024 * 1024) {
+          return res.status(400).json({ error: "Image too large. Max 5MB allowed." });
+        }
+        safeMediaUrl = mediaUrl; // ✅ DB mein save karo
+      } else if (mediaUrl !== "image_stored_locally") {
+        safeMediaUrl = mediaUrl;
+      }
+    }
 
     let conversation = await Conversation.findOne({
       members: { $all: [senderId, receiverId] },
@@ -72,6 +81,8 @@ export const sendMessage = async (req, res) => {
 
     const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
+      // FIX: Ab socket se image bhejna zaroori nahi — DB se milegi
+      // Lekin real-time delivery ke liye socket se bhi bhejo (receiver online ho to turant dikhe)
       io.to(receiverSocketId).emit("newMessage", populatedMsg);
     }
 
@@ -146,16 +157,10 @@ export const reactToMessage = async (req, res) => {
     const receiverSocketId = getReceiverSocketId(message.receiverId.toString());
     const senderSocketId = getReceiverSocketId(message.senderId.toString());
     if (receiverSocketId) {
-      io.to(receiverSocketId).emit("messageReaction", {
-        messageId,
-        reactions: message.reactions
-      });
+      io.to(receiverSocketId).emit("messageReaction", { messageId, reactions: message.reactions });
     }
     if (senderSocketId) {
-      io.to(senderSocketId).emit("messageReaction", {
-        messageId,
-        reactions: message.reactions
-      });
+      io.to(senderSocketId).emit("messageReaction", { messageId, reactions: message.reactions });
     }
 
     return res.status(200).json({ reactions: message.reactions });
@@ -181,6 +186,7 @@ export const deleteMessage = async (req, res) => {
     message.isDeleted = true;
     message.deletedAt = new Date();
     message.message = "This message was deleted";
+    message.mediaUrl = null; // FIX: Delete hone par image bhi hata do
     await message.save();
 
     const receiverSocketId = getReceiverSocketId(message.receiverId.toString());

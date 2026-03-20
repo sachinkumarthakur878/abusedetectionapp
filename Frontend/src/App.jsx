@@ -6,11 +6,12 @@ import Signup from "./components/Signup";
 import Login from "./components/Login";
 import { useAuth } from "./context/AuthProvider";
 import { Toaster } from "react-hot-toast";
-
 import { Navigate, Route, Routes } from "react-router-dom";
+
 function App() {
-  const [authUser, setAuthUser] = useAuth();
-  console.log(authUser);
+  const [authUser] = useAuth();
+  // FIX: Removed console.log(authUser) — logs sensitive user data including token to console
+
   return (
     <>
       <Routes>
@@ -18,17 +19,9 @@ function App() {
           path="/"
           element={
             authUser ? (
-              // <div className="flex h-screen">
-              //   <Left />
-              //   <Right />
-              // </div>
-              <div className="bg-cover "style={{ backgroundImage: `url(${bg})` }}>
+              <div className="bg-cover" style={{ backgroundImage: `url(${bg})` }}>
                 <div className="drawer lg:drawer-open">
-                  <input
-                    id="my-drawer-2"
-                    type="checkbox"
-                    className="drawer-toggle"
-                  />
+                  <input id="my-drawer-2" type="checkbox" className="drawer-toggle" />
                   <div className="drawer-content flex flex-col items-center justify-center">
                     <Right />
                   </div>
@@ -49,14 +42,8 @@ function App() {
             )
           }
         />
-        <Route
-          path="/login"
-          element={authUser ? <Navigate to="/" /> : <Login />}
-        />
-        <Route
-          path="/signup"
-          element={authUser ? <Navigate to="/" /> : <Signup />}
-        />
+        <Route path="/login" element={authUser ? <Navigate to="/" /> : <Login />} />
+        <Route path="/signup" element={authUser ? <Navigate to="/" /> : <Signup />} />
       </Routes>
       <Toaster />
     </>
