@@ -23,7 +23,108 @@ const abuseWords = [
   "tattu","peshaab","peshab","mootna","moot","hagana","haagna","hagna",
   "bakwaas","baklol","bakloal","bklol","ullukapattha","bewakuf",
   "chutmarike","bhosdiwali","gaandmara","lavdya","jhavle","jhavli",
-  "jhaat","jhaatu","jhaatke","bhenchodiya"
+  "jhaat","jhaatu","jhaatke","bhenchodiya",
+  "bsdk","bhosdike","bhosadi","bhosadike","bhosdiwale","bhosdiwali",
+  "bhosdi","bhosad","bhosd",
+ 
+  // ── MADARCHOD variants ────────────────────────────────────
+  "madarchod","madarchodi","maderchod","madarjaat","madar",
+  "madarchood","maa da","maada","maadar",
+ 
+  // ── MC / BC short forms ───────────────────────────────────
+  "mc","m c","emcee","emsi",
+  "bc","b c","bisi","beesi","beecee",
+  "benchod","behenchod","bhenchod","bhenchodiya","bhen chod",
+ 
+  // ── CHUTIYA variants ──────────────────────────────────────
+  "chutiya","chutiye","chut","chutad","chutmarike",
+  "choot","chootiya","chootiyo",
+ 
+  // ── GANDU / GAAND variants ────────────────────────────────
+  "gandu","gaandu","gaand","gand","gaandmara",
+  "gaand mara","gand mara",
+ 
+  // ── HARAMI / KAMINA variants ──────────────────────────────
+  "harami","haramzada","haramzadi","haramkhor",
+  "kamina","kamini","kamine",
+ 
+  // ── SAALA / KUTTE variants ────────────────────────────────
+  "saala","saale","sala","sale",
+  "kutte","kutta","kutti",
+ 
+  // ── FUCK variants — Speech API ine sunta hai ─────────────
+  "fuck","fucker","fucking","fucked","fuckoff","fuckup",
+  "fak","faak","fakk","faku","fakyu","fakoff",
+  "phuck","phak","phuck you","phak you",
+  "fck","f ck","fu ck",
+  "fuck you","fak you","faku","fukk",
+  "fuckyu","fuckyou","fakyou","fak u","fu k",
+ 
+  // ── SHIT variants ─────────────────────────────────────────
+  "shit","shitt","shiit","shhit",
+  "shite","shithead","bullshit","bull shit",
+ 
+  // ── BASTARD / ASSHOLE variants ────────────────────────────
+  "bastard","bastad","bastered",
+  "asshole","ass hole","ashole","ahole",
+ 
+  // ── BITCH variants ───────────────────────────────────────
+  "bitch","bich","biatch","bytch","bich",
+  "randi","randibaaz","randwa","rakhel",
+ 
+  // ── LUND / LAVDE variants ─────────────────────────────────
+  "lund","laund","land",
+  "lavde","lavdya","lawde","laude","lodu","lodhu",
+ 
+  // ── CHOD / CHODU variants ─────────────────────────────────
+  "chod","chodu","chodna","chudna","chud",
+  "chod de","chod do",
+ 
+  // ── HIJRA / CHAKKA variants ───────────────────────────────
+  "hijra","hijar","chakka","chakke",
+ 
+  // ── SUAR / GADHA variants ─────────────────────────────────
+  "suar","suwar","gadha","gadhe",
+ 
+  // ── BAKWAS / BAKLOL variants ──────────────────────────────
+  "bakwas","bakwaas","baklol","bakloal","bklol",
+  "ullu","ullukapattha","bewakoof","bewakuf",
+ 
+  // ── MAAKI / TERIMAAKI variants ───────────────────────────
+  "maaki","terimaa","teribehen","maa ki","teri maa","teri behen",
+  "maa ko","maa ke","teri maa ki","teri behen ki",
+  "madarjaat",
+ 
+  // ── JHAAT / JHAATU variants ───────────────────────────────
+  "jhaat","jhaatu","jhaatke","jhatu",
+ 
+  // ── TATTI / MOOT variants ─────────────────────────────────
+  "tatti","tattu","moot","mootna","peshaab","peshab",
+  "hagana","haagna","hagna",
+ 
+  // ── JHAVLE / JHAVLI variants ──────────────────────────────
+  "jhavle","jhavli",
+ 
+  // ── ENGLISH GENERAL ABUSES ───────────────────────────────
+  "idiot","stupid","moron","loser","jerk","trash",
+  "scumbag","retard","useless","fool","liar","fraud",
+  "dumb","clown","weirdo","psycho","lunatic","garbage",
+  "filth","noob","crybaby","dramaqueen","pig","snake",
+  "dirty","fake","bloody","dog",
+ 
+  // ── NALAYAK / PAGAL variants ──────────────────────────────
+  "nalayak","pagal","paagal","pagla","pagli",
+ 
+  // ── BHADWA variants ───────────────────────────────────────
+  "bhadwa","bhadwe","bhadwagiri",
+ 
+  // ── EXTRA HINGLISH jo Speech API produce karta hai ───────
+  "saale","haraami","kaminey","kutiya","kutiyan",
+  "chikna","chikni","randu","laundi","lauda",
+  "bhad mein jao","bhaad mein","nikal yahan se",
+  "teri aukaat","teri maa ka","teri behen ka",
+  "maa chod","behen chod","maa ki aankh",
+  "tere baap","teri maa ko",
 ];
 
 const abuseEmojis = [
@@ -38,19 +139,46 @@ const EMOJI_LIST = [
 ];
 
 const devanagariMap = {
-  'अ':'a','आ':'aa','इ':'i','ई':'ee','उ':'u','ऊ':'oo','ए':'e','ऐ':'ai','ओ':'o','औ':'au',
-  'क':'k','ख':'kh','ग':'g','घ':'gh','च':'ch','छ':'chh','ज':'j','झ':'jh',
-  'ट':'t','ठ':'th','ड':'d','ढ':'dh','ण':'n',
-  'त':'t','थ':'th','द':'d','ध':'dh','न':'n',
-  'प':'p','फ':'ph','ब':'b','भ':'bh','म':'m',
-  'य':'y','र':'r','ल':'l','व':'v','श':'sh','ष':'sh','स':'s','ह':'h',
-  'ा':'a','ि':'i','ी':'ee','ु':'u','ू':'oo','े':'e','ै':'ai','ो':'o','ौ':'au',
-  'ं':'n','ः':'h','्':'','ँ':'n','ऽ':'',
-  'ञ':'n','ङ':'n','ळ':'l','ृ':'ri','ॅ':'e','ॉ':'o',
-  'ज़':'z','फ़':'f','क़':'q','ख़':'kh','ग़':'gh','ड़':'r','ढ़':'rh',
-  '।':' ','॥':' ',
-  '०':'0','१':'1','२':'2','३':'3','४':'4',
-  '५':'5','६':'6','७':'7','८':'8','९':'9'
+  // ── Vowels ───────────────────────────────────────────────
+  'अ':'a',  'आ':'aa', 'इ':'i',  'ई':'ee',
+  'उ':'u',  'ऊ':'oo', 'ए':'e',  'ऐ':'ai',
+  'ओ':'o',  'औ':'au', 'अं':'an','अः':'ah',
+ 
+  // ── Consonants ───────────────────────────────────────────
+  'क':'k',  'ख':'kh', 'ग':'g',  'घ':'gh', 'ङ':'n',
+  'च':'ch', 'छ':'chh','ज':'j',  'झ':'jh', 'ञ':'n',
+  'ट':'t',  'ठ':'th', 'ड':'d',  'ढ':'dh', 'ण':'n',
+  'त':'t',  'थ':'th', 'द':'d',  'ध':'dh', 'न':'n',
+  'प':'p',
+ 
+  // ✅ KEY FIX: फ → f (pehle 'ph' tha, isliye "fuck" match nahi hota tha)
+  'फ':'f',
+ 
+  'ब':'b',  'भ':'bh', 'म':'m',
+  'य':'y',  'र':'r',  'ल':'l',  'व':'v',
+  'श':'sh', 'ष':'sh', 'स':'s',  'ह':'h',
+  'ळ':'l',  'क्ष':'ksh','त्र':'tr','ज्ञ':'gn',
+ 
+  // ── Matras (vowel signs) ─────────────────────────────────
+  'ा':'a',  'ि':'i',  'ी':'ee', 'ु':'u',
+  'ू':'oo', 'े':'e',  'ै':'ai', 'ो':'o',
+  'ौ':'au', 'ृ':'ri', 'ॅ':'e',  'ॉ':'o',
+ 
+  // ── Nasalization & special ───────────────────────────────
+  'ं':'n',  'ः':'h',  '्':'',   'ँ':'n',  'ऽ':'',
+ 
+  // ── Nuktaa (dotted) consonants ───────────────────────────
+  // ✅ फ़ → f (foreign sounds)
+  'फ़':'f',
+  'ज़':'z',  'क़':'q',  'ख़':'kh', 'ग़':'gh',
+  'ड़':'r',  'ढ़':'rh',
+ 
+  // ── Punctuation ──────────────────────────────────────────
+  '।':' ',  '॥':' ',
+ 
+  // ── Devanagari digits ────────────────────────────────────
+  '०':'0',  '१':'1',  '२':'2',  '३':'3',  '४':'4',
+  '५':'5',  '६':'6',  '७':'7',  '८':'8',  '९':'9',
 };
 
 const devanagariToRoman = (text) => {
@@ -92,7 +220,7 @@ const createSpeechRecognition = () => {
   const recognition = new SR();
   recognition.continuous = false;
   recognition.interimResults = true;
-  recognition.lang = "hi-IN";
+  recognition.lang = "en-IN";
   recognition.maxAlternatives = 1;
   return recognition;
 };

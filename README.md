@@ -435,7 +435,7 @@ const ICE_SERVERS = {
 
 ### Ringtone (Apple FaceTime Style):
 Ringtone is generated using the **Web Audio API** — no MP3 file needed:
-```javascript
+```javascriptd
 // Two-tone ring: 1050Hz + 880Hz simultaneously, repeats every 2 seconds
 const playNote = (freq, startTime, duration) => {
   const osc = audioCtx.createOscillator();
