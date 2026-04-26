@@ -70,6 +70,7 @@
 - 💬 Real-time text messaging with Socket.IO
 - 🛡️ Multi-layer abuse detection (text, voice, image, emoji)
 - 🎤 Voice message recording with live speech-to-text
+- Brevo API key (required for OTP email delivery)
 - 🖼️ Image sharing with AI content scanning
 - 📹 WebRTC peer-to-peer video calls
 - 📞 WebRTC peer-to-peer voice calls
